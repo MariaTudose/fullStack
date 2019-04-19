@@ -1,5 +1,5 @@
 {
-  "persons": [
+  "contacts": [
     {
       "name": "Arto Hellas",
       "number": "040-123456",
@@ -11,14 +11,24 @@
       "id": 2
     },
     {
-      "name": "Arto Järvinen",
-      "number": "040-123456",
-      "id": 3
-    },
-    {
       "name": "Lea Kutvonen",
       "number": "040-123456",
       "id": 4
+    },
+    {
+      "name": "sdsa",
+      "number": "2332",
+      "id": 5
+    },
+    {
+      "name": "sdsaxcv",
+      "number": "233234",
+      "id": 6
+    },
+    {
+      "name": "testi",
+      "number": "10",
+      "id": 7
     }
   ]
 }

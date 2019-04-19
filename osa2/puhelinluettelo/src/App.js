@@ -1,58 +1,49 @@
 import React, { useState, useEffect } from 'react'
-import axios from 'axios'
-
-
-const Persons = ({ persons, filter }) => {
-    return (
-        <ul>{persons
-            .filter(person => person.name.toLocaleLowerCase().includes(filter.toLocaleLowerCase()))
-            .map(person => <li key={person.name}>{person.name} {person.number}</li>)}</ul>
-    )
-}
-
-const PersonForm = props => {
-    return (
-        <form onSubmit={props.addPerson}>
-            <div>
-                nimi: <input value={props.newName} onChange={props.handleNameChange} />
-            </div>
-            <div>numero: <input value={props.newNumber} onChange={props.handleNumberChange} /></div>
-            <div>
-                <button type="submit">lisää</button>
-            </div>
-        </form>
-    )
-}
-
-const Filter = ({ filter, handleFilter }) => {
-    return (
-        <div>
-            rajaa näytettäviä <input value={filter} onChange={handleFilter} />
-        </div>
-    )
-}
-
+import contactsService from './services/contacts'
+import Contacts from './components/contact'
+import Filter from './components/filter'
+import ContactForm from './components/contactForm'
 
 const App = () => {
-    const [persons, setPersons] = useState([])
+    const [contacts, setContacts] = useState([])
     const [newName, setNewName] = useState('')
     const [newNumber, setNewNumber] = useState('')
     const [filter, setFilter] = useState('')
 
-    const hook = () => {
-        axios.get('http://localhost:3001/persons').then(response => {
-            setPersons(response.data)
-        })
+    useEffect(() => {
+        contactsService
+        .getContacts()
+        .then(contacts => setContacts(contacts))
+    }, [])
+
+
+    const addcontact = (event) => {
+        event.preventDefault()
+        if (contacts.filter(contact => contact.name === newName).length) {
+            if(window.confirm(`${newName} on jo luettelossa, korvataanko vanha numero uudella?`)) {
+                let oldContact = contacts.find(contact => contact.name === newName)
+                let newContact = {
+                    "name": newName,
+                    "number": newNumber
+                }
+                contactsService.updateContact(oldContact.id, newContact).then(response =>
+                    setContacts(contacts.map(c => c.id === oldContact.id ? newContact : c))
+                )
+            }
+        } else {
+            const newContact = {'name':newName, 'number':newNumber}
+            contactsService.createContact(newContact).then(contact =>
+                setContacts(contacts.concat(contact))    
+            )
+        }
     }
 
-    useEffect(hook, [])
-
-
-    const addPerson = (event) => {
-        event.preventDefault()
-        if (persons.filter(person => person.name === newName).length) {
-            alert(`${newName} on jo luettelossa`)
-        } else setPersons(persons.concat({ 'name': newName, 'number': newNumber }))
+    const deleteContact = (contact) => {
+        if(window.confirm(`Poistetaanko ${contact.name}?`)) {
+            contactsService.deleteContact(contact).then(response =>
+                setContacts(contacts.filter(c => c.id !== contact.id))
+                )
+        }
     }
 
     const handleNameChange = (event) => {
@@ -72,14 +63,14 @@ const App = () => {
             <h2>Puhelinluettelo</h2>
             <Filter filter={filter} handleFilter={handleFilter} />
             <h3>lisää uusi</h3>
-            <PersonForm handleNameChange={handleNameChange}
+            <ContactForm handleNameChange={handleNameChange}
                 newName={newName}
                 handleNumberChange={handleNumberChange}
                 newNumber={newNumber}
-                addPerson={addPerson}
+                addcontact={addcontact}
             />
             <h3>Numerot</h3>
-            <Persons persons={persons} filter={filter} />
+            <Contacts contacts={contacts} filter={filter} deleteContact={deleteContact} />
         </div>
     )
 }
