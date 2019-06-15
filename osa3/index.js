@@ -1,6 +1,7 @@
 const express = require('express')
 const app = express()
 const bodyParser = require('body-parser')
+const cors = require('cors')
 
 let notes = [
     {
@@ -33,12 +34,14 @@ const logger = (request, response, next) => {
 
 app.use(bodyParser.json())
 app.use(logger)
+app.use(cors())
 
 app.get('/', (req, res) => {
     res.send('<h1>Hello World!</h1>')
 })
 
 app.get('/notes', (req, res) => {
+    console.log(notes);
     res.json(notes)
 })
 
@@ -94,7 +97,7 @@ const unknownEndpoint = (request, response) => {
 
 app.use(unknownEndpoint)
 
-const port = 3001
+const port = process.env.PORT || 3001
 app.listen(port, () => {
     console.log(`Server running on port ${port}`)
 })
