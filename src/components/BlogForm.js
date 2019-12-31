@@ -3,7 +3,7 @@ import blogService from '../services/blogs'
 
 const blogFields = {title: '', author: '', url: ''}
 
-const BlogForm = ({ updateBlogs }) => {
+const BlogForm = ({ updateBlogs, setNotification }) => {
   const [newBlog, setNewBlog] = useState(blogFields)
 
   const handleBlogChange = ({value, name}) => {
@@ -17,6 +17,7 @@ const BlogForm = ({ updateBlogs }) => {
       .then(data => {
         updateBlogs(data)
         setNewBlog(blogFields)
+        setNotification(`A new blog ${data.title} by ${data.author} added`, "success")
       })
   }
 

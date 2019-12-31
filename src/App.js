@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Blog from './components/Blog'
 import BlogForm from './components/BlogForm'
+import Notification from './components/Notification'
 import loginService from './services/login'
 import blogService from './services/blogs' 
 
@@ -10,6 +11,7 @@ function App() {
   const [username, setUsername] = useState("")
   const [user, setUser] = useState(null)
   const [blogs, setBlogs] = useState([])
+  const [notification, setNotification] = useState({msg: "", style: ""})
 
   useEffect(() => {
     blogService
@@ -40,7 +42,7 @@ function App() {
       setUsername('')
       setPassword('')
     } catch (e) {
-      console.log('wrong credentials')
+      setNotificationMsg("wrong credentials", "error")
     }
   }
 
@@ -76,8 +78,16 @@ function App() {
 
   const updateBlogs = blog => setBlogs(blogs.concat(blog))
 
+  const setNotificationMsg = (msg, style) => {
+    setNotification({msg, style})
+    setTimeout(() => {
+      setNotification({msg: "", style: ""})
+    }, 5000)
+  }
+
   return (
     <div>
+      <Notification msg={notification.msg} style={notification.style} />
       {(user === null) ? (
           <div>
             <h2>Log in to application</h2>
@@ -90,7 +100,7 @@ function App() {
               {user.name} logged in
               <button onClick={handleLogout}>logout</button>
             </p>
-            <BlogForm updateBlogs={updateBlogs} />
+            <BlogForm updateBlogs={updateBlogs} setNotification={setNotificationMsg} />
             {blogs.map(blog =>
               <Blog key={blog.id} blog={blog} />
             )}
