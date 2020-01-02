@@ -2,15 +2,18 @@ import React, { useState, useEffect } from 'react';
 import Blog from './components/Blog'
 import BlogForm from './components/BlogForm'
 import Notification from './components/Notification'
+import Togglable from './components/Togglable'
 import loginService from './services/login'
 import blogService from './services/blogs' 
 
+const blogFields = {title: '', author: '', url: ''}
 
 function App() {
   const [password, setPassword] = useState("")
   const [username, setUsername] = useState("")
   const [user, setUser] = useState(null)
   const [blogs, setBlogs] = useState([])
+  const [newBlog, setNewBlog] = useState(blogFields)
   const [notification, setNotification] = useState({msg: "", style: ""})
 
   useEffect(() => {
@@ -76,7 +79,20 @@ function App() {
     </form>
   )
 
-  const updateBlogs = blog => setBlogs(blogs.concat(blog))
+  const addBlog = e => {
+    e.preventDefault()
+    blogService
+      .create(newBlog)
+      .then(data => {
+        setBlogs(blogs.concat(data))
+        setNewBlog(blogFields)
+        setNotificationMsg(`A new blog ${data.title} by ${data.author} added`, "success")
+      })
+  }
+
+  const handleBlogChange = ({value, name}) => {
+    setNewBlog({...newBlog, [name]: value})
+  }
 
   const setNotificationMsg = (msg, style) => {
     setNotification({msg, style})
@@ -100,7 +116,9 @@ function App() {
               {user.name} logged in
               <button onClick={handleLogout}>logout</button>
             </p>
-            <BlogForm updateBlogs={updateBlogs} setNotification={setNotificationMsg} />
+            <Togglable buttonLabel="new blog">
+              <BlogForm addBlog={addBlog} newBlog={newBlog} handleChange={handleBlogChange} />
+            </Togglable>
             {blogs.map(blog =>
               <Blog key={blog.id} blog={blog} />
             )}
