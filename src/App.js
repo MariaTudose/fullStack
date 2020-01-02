@@ -113,6 +113,17 @@ function App() {
       .catch(e => console.log(e))
   }
 
+  const handleRemove = id => {
+    if(window.confirm("Are you sure you want to delete this blog?")) {
+      blogService
+        .remove(id)
+        .then(() =>
+          setBlogs(blogs.filter(blog => blog.id !== id))
+        )
+        .catch(e => setNotificationMsg(e.response.data.error, "error"))
+    }
+  }
+
   return (
     <div>
       <Notification msg={notification.msg} style={notification.style} />
@@ -132,7 +143,7 @@ function App() {
               <BlogForm addBlog={addBlog} newBlog={newBlog} handleChange={handleBlogChange} />
             </Togglable>
             {blogs.sort((a, b) => b.likes - a.likes).map(blog =>
-              <Blog key={blog.id} blog={blog} handleLike={handleLike}/>
+              <Blog key={blog.id} blog={blog} handleLike={handleLike} handleRemove={handleRemove}/>
             )}
           </div>
       )}
