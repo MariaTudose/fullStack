@@ -101,6 +101,18 @@ function App() {
     }, 5000)
   }
 
+  const handleLike = (id, likes) => {
+    blogService
+      .like(id, likes)
+      .then(res => {
+        const i = blogs.findIndex(blog => blog.id === id)
+        const newBlogs = [...blogs]
+        newBlogs[i] = res
+        setBlogs(newBlogs)
+      })
+      .catch(e => console.log(e))
+  }
+
   return (
     <div>
       <Notification msg={notification.msg} style={notification.style} />
@@ -120,7 +132,7 @@ function App() {
               <BlogForm addBlog={addBlog} newBlog={newBlog} handleChange={handleBlogChange} />
             </Togglable>
             {blogs.map(blog =>
-              <Blog key={blog.id} blog={blog} />
+              <Blog key={blog.id} blog={blog} handleLike={handleLike}/>
             )}
           </div>
       )}
