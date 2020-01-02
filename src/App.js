@@ -143,7 +143,7 @@ function App() {
               <BlogForm addBlog={addBlog} newBlog={newBlog} handleChange={handleBlogChange} />
             </Togglable>
             {blogs.sort((a, b) => b.likes - a.likes).map(blog =>
-              <Blog key={blog.id} blog={blog} handleLike={handleLike} handleRemove={handleRemove}/>
+              <Blog key={blog.id} blog={blog} handleLike={handleLike} handleRemove={handleRemove} user={user}/>
             )}
           </div>
       )}
