@@ -8,7 +8,7 @@ const BlogForm = ({ addBlog, newBlog, handleChange }) => (
       <input
         name="title"
         value={newBlog.title}
-        onChange={({target}) => handleChange(target)}
+        onChange={({ target }) => handleChange(target)}
       />
     </div>
     <div>
@@ -16,7 +16,7 @@ const BlogForm = ({ addBlog, newBlog, handleChange }) => (
       <input
         name="author"
         value={newBlog.author}
-        onChange={({target}) => handleChange(target)}
+        onChange={({ target }) => handleChange(target)}
       />
     </div>
     <div>
@@ -24,11 +24,11 @@ const BlogForm = ({ addBlog, newBlog, handleChange }) => (
       <input
         name="url"
         value={newBlog.url}
-        onChange={({target}) => handleChange(target)}
+        onChange={({ target }) => handleChange(target)}
       />
     </div>
     <button type="submit">create</button>
-  </form> 
+  </form>
 )
 
 BlogForm.propTypes = {

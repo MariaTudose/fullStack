@@ -1,4 +1,4 @@
-import React, {useState} from 'react'
+import React, { useState } from 'react'
 const Blog = ({ blog, handleLike, handleRemove, user }) => {
   const [showDetails, setShowDetails] = useState(false)
   const blogStyle = {
@@ -18,7 +18,7 @@ const Blog = ({ blog, handleLike, handleRemove, user }) => {
         <div>
           <a href={blog.url}>{blog.url}</a>
           <br/>
-          {blog.likes} likes 
+          {blog.likes} likes
           <button onClick={() => handleLike(blog.id, blog.likes)}>like</button>
           <br/>
           added by {blog.user.name}

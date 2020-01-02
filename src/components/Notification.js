@@ -1,7 +1,7 @@
 import React from 'react'
 
 const Notification = ({ msg, style }) => {
-  if (msg === "") {
+  if (msg === '') {
     return null
   }
 
@@ -12,4 +12,4 @@ const Notification = ({ msg, style }) => {
   )
 }
 
-export default Notification 
+export default Notification
