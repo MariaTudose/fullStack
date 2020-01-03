@@ -14,9 +14,32 @@ describe('<App />', () => {
       () => component.getByText('login')
     )
 
-    const blogs = component.container.querySelectorAll('.blog-list')
+    const blogs = component.container.querySelectorAll('.blog-item')
 
     expect(blogs.length).toBe(0)
 
+  })
+
+  test('if user is logged in, blogs are rendered', async () => {
+    const user = {
+      username: 'testaaja',
+      token: '123456789',
+      name: 'matti tattinen'
+    }
+
+    window.localStorage.setItem('user', JSON.stringify(user))
+
+    const component = render(
+      <App />
+    )
+    component.rerender(<App />)
+
+    await waitForElement(
+      () => component.container.querySelector('.blog-item')
+    )
+
+    const blogs = component.container.querySelectorAll('.blog-item')
+
+    expect(blogs.length).toBe(6)
   })
 })
