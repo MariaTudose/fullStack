@@ -1,0 +1,50 @@
+{
+  "notes": [
+    {
+      "content": "custom-hookit aivan mahtavia",
+      "id": 1
+    },
+    {
+      "content": "paras feature ikinä <3",
+      "id": 2
+    },
+    {
+      "content": "sda",
+      "id": 3
+    },
+    {
+      "content": "asd",
+      "id": 4
+    },
+    {
+      "content": "safasf",
+      "id": 5
+    },
+    {
+      "content": "sadas",
+      "id": 6
+    }
+  ],
+  "persons": [
+    {
+      "name": "mluukkai",
+      "number": "040-5483923",
+      "id": 1
+    },
+    {
+      "name": "asdsa",
+      "number": "24234",
+      "id": 2
+    },
+    {
+      "name": "sdfsfds",
+      "number": "5443534",
+      "id": 3
+    },
+    {
+      "name": "asdsad12§34",
+      "number": "23423523",
+      "id": 4
+    }
+  ]
+}
