@@ -1,9 +1,14 @@
 import React from 'react'
+import { connect } from 'react-redux'
+
 import loginService from '../services/login'
 import blogService from '../services/blogs'
 import  { useField } from '../hooks'
 
-const LoginForm = ({ saveUser, setNotificationMsg }) => {
+import { setNotification } from '../reducers/notificationReducer'
+
+
+const LoginForm = ({ saveUser, setNotification }) => {
   const username = useField('text')
   const password = useField('password')
 
@@ -17,7 +22,7 @@ const LoginForm = ({ saveUser, setNotificationMsg }) => {
       blogService.setToken(user.token)
       saveUser(user)
     } catch (e) {
-      setNotificationMsg('wrong credentials', 'error')
+      setNotification('wrong credentials', 'error')
     }
   }
 
@@ -39,4 +44,14 @@ const LoginForm = ({ saveUser, setNotificationMsg }) => {
   )
 }
 
-export default LoginForm
+const mapStateToProps = (state) => {
+  return {
+    notification: state.notification,
+  }
+}
+
+const mapDispatchToProps = {
+  setNotification
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(LoginForm)

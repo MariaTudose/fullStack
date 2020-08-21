@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react'
+import React, { useEffect } from 'react'
+import { connect } from 'react-redux'
 
 import Blog from './components/Blog'
 import BlogForm from './components/BlogForm'
@@ -7,17 +8,15 @@ import Notification from './components/Notification'
 import Togglable from './components/Togglable'
 import blogService from './services/blogs'
 
-function App() {
-  const [user, setUser] = useState(null)
-  const [blogs, setBlogs] = useState([])
-  const [notification, setNotification] = useState({ msg: '', style: '' })
+import { getBlogs, createBlog, likeBlog, setBlogs } from './reducers/blogReducer'
+import { setNotification } from './reducers/notificationReducer'
+import { setUser } from './reducers/userReducer'
+
+function App({ getBlogs, createBlog, likeBlog, setBlogs, setUser, setNotification, notification, blogs, user }) {
 
   useEffect(() => {
-    blogService
-      .getAll().then(initialNotes => {
-        setBlogs(initialNotes)
-      })
-  }, [])
+    getBlogs()
+  }, [getBlogs])
 
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('user')
@@ -26,7 +25,7 @@ function App() {
       setUser(user)
       blogService.setToken(user.token)
     }
-  }, [])
+  }, [setUser])
 
   const handleLogout = () => {
     setUser(null)
@@ -36,27 +35,6 @@ function App() {
 
   const saveUser = user => setUser(user)
 
-  const addBlog = blog => setBlogs(blogs.concat(blog))
-
-  const setNotificationMsg = (msg, style) => {
-    setNotification({ msg, style })
-    setTimeout(() => {
-      setNotification({ msg: '', style: '' })
-    }, 5000)
-  }
-
-  const handleLike = (id, likes) => {
-    blogService
-      .like(id, likes)
-      .then(res => {
-        const i = blogs.findIndex(blog => blog.id === id)
-        const newBlogs = [...blogs]
-        newBlogs[i] = res
-        setBlogs(newBlogs)
-      })
-      .catch(e => console.log(e))
-  }
-
   const handleRemove = id => {
     if(window.confirm('Are you sure you want to delete this blog?')) {
       blogService
@@ -64,15 +42,15 @@ function App() {
         .then(() =>
           setBlogs(blogs.filter(blog => blog.id !== id))
         )
-        .catch(e => setNotificationMsg(e.response.data.error, 'error'))
+        .catch(e => setNotification(e.response.data.error, 'error'))
     }
   }
 
   return (
     <div>
-      <Notification msg={notification.msg} style={notification.style} />
+      <Notification notification={notification} />
       {(user === null) ? (
-        <LoginForm saveUser={saveUser} setNotificationMsg={setNotificationMsg} />
+        <LoginForm saveUser={saveUser} />
       ) : (
         <div>
           <h2>Blogs</h2>
@@ -81,11 +59,11 @@ function App() {
             <button onClick={handleLogout}>logout</button>
           </p>
           <Togglable buttonLabel="new blog">
-            <BlogForm addBlog={addBlog} setNotificationMsg={setNotificationMsg} />
+            <BlogForm addBlog={createBlog} />
           </Togglable>
           <div className="blog-list" >
             {blogs.sort((a, b) => b.likes - a.likes).map(blog =>
-              <Blog key={blog.id} blog={blog} handleLike={handleLike} handleRemove={handleRemove} user={user}/>
+              <Blog key={blog.id} blog={blog} handleLike={likeBlog} handleRemove={handleRemove} user={user}/>
             )}
           </div>
         </div>
@@ -94,4 +72,21 @@ function App() {
   )
 }
 
-export default App
+const mapStateToProps = state => {
+  return {
+    notification: state.notification,
+    blogs: state.blogs,
+    user: state.user
+  }
+}
+
+const mapDispatchToProps = {
+  getBlogs,
+  createBlog,
+  likeBlog,
+  setBlogs,
+  setUser,
+  setNotification
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(App)
