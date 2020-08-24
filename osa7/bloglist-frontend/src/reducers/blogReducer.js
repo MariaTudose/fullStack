@@ -1,16 +1,23 @@
 import blogService from '../services/blogs'
 
-const reducer = (state = [], action) => {
+const initialState = {
+  all: [],
+  details: null
+}
+
+const reducer = (state = initialState, action) => {
   switch(action.type) {
     case 'SET_BLOGS':
-      return action.blogs
+      return {...state, all: action.blogs}
     case 'CREATE_BLOG':
-      return state.concat(action.newBlog)
+      return {...state, all: state.all.concat(action.newBlog)}
     case 'LIKE_BLOG':
-      const i = state.findIndex(blog => blog.id === action.blog.id)
-      const newBlogs = [...state]
+      const i = state.all.findIndex(blog => blog.id === action.blog.id)
+      const newBlogs = [...state.all]
       newBlogs[i] = action.blog
-      return newBlogs
+      return {...state, all: newBlogs, details: action.blog}
+    case 'GET_BLOG':
+      return {...state, details: action.blog }
     default:
       return state
   }
@@ -22,6 +29,16 @@ export const getBlogs = () => {
     dispatch({
       type: 'SET_BLOGS',
       blogs
+    })
+  }
+}
+
+export const getBlog = id => {
+  return async dispatch => {
+    const blog = await blogService.getBlog(id)
+    dispatch({
+      type: 'GET_BLOG',
+      blog
     })
   }
 }

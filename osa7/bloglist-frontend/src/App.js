@@ -1,6 +1,11 @@
 import React, { useEffect } from 'react'
 import { connect } from 'react-redux'
 
+import {
+  BrowserRouter as Router,
+  Switch, Route, Link, useParams
+} from "react-router-dom"
+
 import Blog from './components/Blog'
 import BlogForm from './components/BlogForm'
 import LoginForm from './components/LoginForm'
@@ -8,12 +13,22 @@ import Notification from './components/Notification'
 import Togglable from './components/Togglable'
 import blogService from './services/blogs'
 
-import { getBlogs, createBlog, likeBlog, setBlogs } from './reducers/blogReducer'
+import { getBlogs, createBlog, setBlogs } from './reducers/blogReducer'
 import { setNotification } from './reducers/notificationReducer'
-import { setUser } from './reducers/userReducer'
+import { setUser, getAllUsers } from './reducers/userReducer'
 
-function App({ getBlogs, createBlog, likeBlog, setBlogs, setUser, setNotification, notification, blogs, user }) {
 
+function App(props) {
+  const {
+    getBlogs,
+    createBlog,
+    setUser,
+    getAllUsers,
+    notification,
+    blogs,
+    user
+  } = props
+  
   useEffect(() => {
     getBlogs()
   }, [getBlogs])
@@ -27,48 +42,91 @@ function App({ getBlogs, createBlog, likeBlog, setBlogs, setUser, setNotificatio
     }
   }, [setUser])
 
+  useEffect(() => {
+    getAllUsers()
+  }, [getAllUsers])
+
   const handleLogout = () => {
     setUser(null)
     window.localStorage.removeItem('user')
     blogService.setToken('')
   }
 
-  const saveUser = user => setUser(user)
+  const UserView = ({ users }) => {
+    const id = useParams().id
+    const visibleUser = users.find(u => u.id === id)
 
-  const handleRemove = id => {
-    if(window.confirm('Are you sure you want to delete this blog?')) {
-      blogService
-        .remove(id)
-        .then(() =>
-          setBlogs(blogs.filter(blog => blog.id !== id))
-        )
-        .catch(e => setNotification(e.response.data.error, 'error'))
+    if (!visibleUser) {
+      return null
     }
+
+    return (
+      <div>
+        <h2>{visibleUser.name}</h2>
+        <h3>Added blogs</h3>
+        <ul>{visibleUser.blogs.all.map(blog =>
+            <li key={blog.id}>{blog.title}</li>
+          )}</ul>
+      </div>
+    )
   }
 
   return (
-    <div>
+    <Router>
       <Notification notification={notification} />
-      {(user === null) ? (
-        <LoginForm saveUser={saveUser} />
+      {(user.user === null) ? (
+        <LoginForm saveUser={setUser} />
       ) : (
         <div>
-          <h2>Blogs</h2>
-          <p>
-            {user.name} logged in
+          <div className="padding">
+            <Link to="/">blogs</Link>
+            <Link to="/users">users</Link>
+            {user.user.name} logged in
             <button onClick={handleLogout}>logout</button>
-          </p>
-          <Togglable buttonLabel="new blog">
-            <BlogForm addBlog={createBlog} />
-          </Togglable>
-          <div className="blog-list" >
-            {blogs.sort((a, b) => b.likes - a.likes).map(blog =>
-              <Blog key={blog.id} blog={blog} handleLike={likeBlog} handleRemove={handleRemove} user={user}/>
-            )}
           </div>
+          <Switch>
+            <Route path="/blogs/:id">
+              <Blog user={user.user}/>
+            </Route>
+            <Route path="/users/:id">
+              <UserView users={user.users} />
+            </Route>
+            <Route path="/users">
+              <h2>Users</h2>
+              <table>
+                <thead>
+                  <tr>
+                    <th style={{ textAlign: 'left' }}>Users</th>
+                    <th>Blogs created</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[...user.users].map(user => (
+                    <tr key={user.id}>
+                      <td><Link key={user.id} to={`/users/${user.id}`}>{user.name}</Link></td>
+                      <td>{user.blogs.length}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </Route>
+            <Route path="/">
+              <h2>Blogs</h2>
+              <Togglable buttonLabel="new blog">
+                <BlogForm addBlog={createBlog} />
+              </Togglable>
+              <ul className="blog-list" >
+                {blogs.all.sort((a, b) => b.likes - a.likes).map(blog =>
+                  <li key={blog.id} ><Link className="blog-item"to={`/blogs/${blog.id}`}>{blog.title} {blog.author}</Link></li>
+                )}
+              </ul>
+            </Route>
+          </Switch>
+
+          
         </div>
       )}
-    </div>
+    </Router>
   )
 }
 
@@ -83,10 +141,10 @@ const mapStateToProps = state => {
 const mapDispatchToProps = {
   getBlogs,
   createBlog,
-  likeBlog,
   setBlogs,
   setUser,
-  setNotification
+  setNotification,
+  getAllUsers
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(App)

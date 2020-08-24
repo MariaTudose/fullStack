@@ -10,3 +10,17 @@
   &.error {color: red}
   &.success {color: green}
 }
+
+.padding > * {
+  margin-right: 10px;
+}
+
+.blog-list {
+  padding: 10, 0, 0, 2;
+  margin-bottom: 5;
+}
+
+.blog-item {
+  border: 'solid';
+  border-width: 1;
+}
