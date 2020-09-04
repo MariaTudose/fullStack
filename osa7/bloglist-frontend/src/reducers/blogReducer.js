@@ -16,6 +16,9 @@ const reducer = (state = initialState, action) => {
       const newBlogs = [...state.all]
       newBlogs[i] = action.blog
       return {...state, all: newBlogs, details: action.blog}
+    case 'ADD_COMMENT':
+      const comments = state.details.comments.concat(action.comment)
+      return {...state, details: {...state.details, comments}}
     case 'GET_BLOG':
       return {...state, details: action.blog }
     default:
@@ -58,6 +61,16 @@ export const likeBlog = (id, likes) => {
     dispatch({
       type: 'LIKE_BLOG',
       blog
+    })
+  }
+}
+
+export const addComment = (id, comment) => {
+  return async dispatch => {
+    await blogService.comment(id, comment)
+    dispatch({
+      type: 'ADD_COMMENT',
+      comment
     })
   }
 }

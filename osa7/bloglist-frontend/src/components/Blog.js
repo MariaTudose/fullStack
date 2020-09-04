@@ -2,12 +2,12 @@ import React, { useEffect } from 'react'
 import { connect } from 'react-redux'
 import { withRouter, useParams } from "react-router-dom"
 import blogService from '../services/blogs'
-
-import { getBlog, getBlogs, likeBlog, setBlogs } from '../reducers/blogReducer'
+import { useField } from '../hooks'
+import { getBlog, getBlogs, likeBlog, setBlogs, addComment } from '../reducers/blogReducer'
 import { setNotification } from '../reducers/notificationReducer'
 
 
-const Blog = ({ user, blogs, likeBlog, getBlog, getBlogs, setBlogs, setNotification }) => {
+const Blog = ({ user, blogs, likeBlog, getBlog, getBlogs, setBlogs, setNotification, addComment }) => {
   const blogStyle = {
     paddingTop: 10,
     paddingLeft: 2,
@@ -15,6 +15,7 @@ const Blog = ({ user, blogs, likeBlog, getBlog, getBlogs, setBlogs, setNotificat
   }
 
   const id = useParams().id
+  const comment = useField('text')
 
   useEffect(() => {
     getBlog(id)
@@ -35,6 +36,12 @@ const Blog = ({ user, blogs, likeBlog, getBlog, getBlogs, setBlogs, setNotificat
     }
   }
 
+  const submitComment = e => {
+    e.preventDefault()
+    addComment(blogs.details.id, comment.value)
+    comment.reset()
+  }
+
   return (
     <div style={blogStyle}>
       {blogs.details &&
@@ -47,6 +54,12 @@ const Blog = ({ user, blogs, likeBlog, getBlog, getBlogs, setBlogs, setNotificat
           <br/>
           added by {blogs.details.user.name}
           {user.name === blogs.details.user.name && <button onClick={() => handleRemove(blogs.details.id)}>remove</button>}
+          <h2>comments</h2>
+          <form onSubmit={submitComment}>
+            <input {...comment.inputProps} />
+            <button type="submit">add comment</button>
+          </form>
+          <ul>{blogs.details.comments.map((comment, i) => <li key={i}>{comment}</li>)}</ul>
         </div>
       }
     </div>
@@ -64,7 +77,8 @@ const mapDispatchToProps = {
   getBlogs,
   likeBlog,
   setBlogs,
-  setNotification
+  setNotification,
+  addComment
 }
 
 export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Blog))
