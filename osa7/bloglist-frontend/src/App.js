@@ -55,16 +55,16 @@ function App(props) {
   const UserView = ({ users }) => {
     const id = useParams().id
     const visibleUser = users.find(u => u.id === id)
-
+    
     if (!visibleUser) {
       return null
     }
 
     return (
-      <div>
+      <div className="content">
         <h2>{visibleUser.name}</h2>
         <h3>Added blogs</h3>
-        <ul>{visibleUser.blogs.all.map(blog =>
+        <ul>{visibleUser.blogs.map(blog =>
             <li key={blog.id}>{blog.title}</li>
           )}</ul>
       </div>
@@ -78,11 +78,15 @@ function App(props) {
         <LoginForm saveUser={setUser} />
       ) : (
         <div>
-          <div className="padding">
-            <Link to="/">blogs</Link>
-            <Link to="/users">users</Link>
-            {user.user.name} logged in
-            <button onClick={handleLogout}>logout</button>
+          <div className="navbar">
+            <div>
+              <Link to="/">blogs</Link>
+              <Link to="/users">users</Link>
+            </div>
+            <div>
+              <span>{user.user.name} logged in</span>
+              <button onClick={handleLogout}>logout</button>
+            </div>
           </div>
           <Switch>
             <Route path="/blogs/:id">
@@ -92,34 +96,38 @@ function App(props) {
               <UserView users={user.users} />
             </Route>
             <Route path="/users">
-              <h2>Users</h2>
-              <table>
-                <thead>
-                  <tr>
-                    <th style={{ textAlign: 'left' }}>Users</th>
-                    <th>Blogs created</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {[...user.users].map(user => (
-                    <tr key={user.id}>
-                      <td><Link key={user.id} to={`/users/${user.id}`}>{user.name}</Link></td>
-                      <td>{user.blogs.length}</td>
+              <div className="content">
+                <h2>Users</h2>
+                <table>
+                  <thead>
+                    <tr>
+                      <th style={{ textAlign: 'left' }}>Users</th>
+                      <th>Blogs created</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {[...user.users].map(user => (
+                      <tr key={user.id}>
+                        <td><Link key={user.id} to={`/users/${user.id}`}>{user.name}</Link></td>
+                        <td>{user.blogs.length}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </Route>
             <Route path="/">
-              <h2>Blogs</h2>
-              <Togglable buttonLabel="new blog">
-                <BlogForm addBlog={createBlog} />
-              </Togglable>
-              <ul className="blog-list" >
-                {blogs.all.sort((a, b) => b.likes - a.likes).map(blog =>
-                  <li key={blog.id} ><Link className="blog-item"to={`/blogs/${blog.id}`}>{blog.title} {blog.author}</Link></li>
-                )}
-              </ul>
+              <div className="content">
+                <h2>Blogs</h2>
+                <Togglable buttonLabel="new blog">
+                  <BlogForm addBlog={createBlog} />
+                </Togglable>
+                <ul className="blog-list" >
+                  {blogs.all.sort((a, b) => b.likes - a.likes).map(blog =>
+                    <li key={blog.id} ><Link className="blog-item"to={`/blogs/${blog.id}`}>{blog.title}</Link> by {blog.author}</li>
+                  )}
+                </ul>
+              </div>
             </Route>
           </Switch>
 

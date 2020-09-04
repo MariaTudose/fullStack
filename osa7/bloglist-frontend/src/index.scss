@@ -1,3 +1,8 @@
+body, html{
+  margin: 0;
+  height: 100%;
+  background-color: #a8dadc;
+}
 
 .notification {
   background: lightgrey;
@@ -11,16 +16,29 @@
   &.success {color: green}
 }
 
-.padding > * {
-  margin-right: 10px;
+.navbar {
+  display: flex;
+  flex: 1 1 auto;
+  justify-content: space-between;
+  background-color: #457b9d;
+  padding: 10px;
+
+  > div > a, span {
+    margin-right: 10px;
+    color: white;
+  }
 }
 
-.blog-list {
-  padding: 10, 0, 0, 2;
-  margin-bottom: 5;
+.content {
+  margin: 10px;
 }
 
-.blog-item {
-  border: 'solid';
-  border-width: 1;
+ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+li {
+  margin-top: 10px;
 }

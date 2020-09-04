@@ -8,12 +8,6 @@ import { setNotification } from '../reducers/notificationReducer'
 
 
 const Blog = ({ user, blogs, likeBlog, getBlog, getBlogs, setBlogs, setNotification, addComment }) => {
-  const blogStyle = {
-    paddingTop: 10,
-    paddingLeft: 2,
-    marginBottom: 5
-  }
-
   const id = useParams().id
   const comment = useField('text')
 
@@ -43,7 +37,7 @@ const Blog = ({ user, blogs, likeBlog, getBlog, getBlogs, setBlogs, setNotificat
   }
 
   return (
-    <div style={blogStyle}>
+    <div className="content">
       {blogs.details &&
         <div>
           <h2>{blogs.details.title}</h2>
