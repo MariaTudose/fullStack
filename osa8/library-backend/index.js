@@ -1,5 +1,20 @@
 const { ApolloServer, UserInputError, gql } = require("apollo-server");
 const { v1: uuid } = require("uuid");
+const mongoose = require('mongoose')
+const Author = require('./models/author')
+const Book = require('./models/book')
+
+const MONGODB_URI = "mongodb+srv://admin:admin@library.ssopm.mongodb.net/library?retryWrites=true&w=majority"
+
+console.log('connecting to', MONGODB_URI)
+
+mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false, useCreateIndex: true })
+  .then(() => {
+    console.log('connected to MongoDB')
+  })
+  .catch((error) => {
+    console.log('error connection to MongoDB:', error.message)
+  })
 
 let authors = [
   {
@@ -90,7 +105,7 @@ const typeDefs = gql`
   type Book {
     title: String!
     published: Int!
-    author: String!
+    author: Author!
     genres: [String]!
     id: ID!
   }
@@ -115,55 +130,73 @@ const typeDefs = gql`
 
 const resolvers = {
   Query: {
-    bookCount: () => books.length,
-    authorCount: () => authors.length,
-    allBooks: (root, args) => {
-      let filteredBooks = books;
-
-      if (args.author) {
-        filteredBooks = filteredBooks.filter(
-          book => book.author === args.author
-        );
-      }
-
-      if (args.genre) {
-        filteredBooks = filteredBooks.filter(book =>
-          book.genres.includes(args.genre)
-        );
-      }
-
-      return filteredBooks;
-    },
-    allAuthors: () => authors
+    bookCount: () => Book.collection.countDocuments(),
+    authorCount: () => Author.collection.countDocuments(),
+    allBooks: async () => await Book.find({}).populate('author'),
+    allAuthors: () => Author.find({})
   },
   Author: {
-    bookCount: root => books.filter(book => book.author === root.name).length
+    bookCount: async (root) => {
+      const books = await Book.find({}).populate('author')
+      return books.reduce((acc, cur) => cur.author.name === root.name ? ++acc : acc, 0)
+    }
   },
   Mutation: {
-    addBook: (root, args) => {
-      if (books.find(book => book.title === args.title)) {
+    addBook: async (root, args) => {
+      if ((await Book.find({ title: args.title })).length > 0 ) {
         throw new UserInputError("Name must be unique", {
-          invalidArgs: args.name
+          invalidArgs: args.title
         });
       }
 
-      if (!authors.includes(author => author.name === args.author)) {
-        const author = { name: args.author, id: uuid() };
-        authors = authors.concat(author);
+      if (args.author.length < 5) {
+        throw new UserInputError("Author name should be longer than 4 characters", {
+          invalidArgs: args.author
+        });
+      }
+      
+      if (args.title.length < 3) {
+        throw new UserInputError("Book title should be longer than 2 characters", {
+          invalidArgs: args.author
+        });
       }
 
-      const book = { ...args, id: uuid() };
-      books = books.concat(book);
-      return book;
+      const author = await Author.findOne({ name: args.author })
+
+      if (author) {
+        const book = new Book({ ...args, author: author._id })
+        try {
+          bookObj = await book.save()
+          bookObj.author = author
+          return bookObj.populate('author')
+        } catch (error) {
+          throw new UserInputError(error.message, {
+            invalidArgs: args,
+          })
+        }
+      } else {
+        try {
+          const newAuthor = new Author({ name: args.author })
+          const authorObj = await newAuthor.save()
+          const book = new Book({ ...args, author: authorObj._id })
+          bookObj = await book.save()
+          bookObj.author = authorObj
+          return bookObj.populate('author')
+        } catch (error) {
+          throw new UserInputError(error.message, {
+            invalidArgs: args,
+          })
+        }
+      }
     },
-    editAuthor: (root, args) => {
-      const author = authors.find(author => author.name === args.name);
-
-      if (!author) return null;
-
-      const updatedAuthor = { ...author, born: args.setBornTo };
-      authors = authors.map(a => (a.name === args.name ? updatedAuthor : a));
-      return updatedAuthor;
+    editAuthor: async (root, args) => {
+      const author = await Author.findOne({ name: args.name })
+      if (!author) {
+        return null;
+      } else {
+        author.born = args.setBornTo
+        return author.save()
+      }
     }
   }
 };
