@@ -8,7 +8,10 @@ const Authors = props => {
   const [born, setBorn] = useState("");
 
   const [editAuthor] = useMutation(EDIT_AUTHOR, {
-    refetchQueries: [{ query: ALL_AUTHORS }, { query: ALL_BOOKS }]
+    refetchQueries: [{ query: ALL_AUTHORS }, { query: ALL_BOOKS }],
+    onError: error => {
+      props.notify(error.graphQLErrors[0].message);
+    },
   });
 
   if (!props.show) {
@@ -34,7 +37,7 @@ const Authors = props => {
 
   return (
     <div>
-      <h2>authors</h2>
+      <h2>Authors</h2>
       <table>
         <tbody>
           <tr>
